@@ -1,0 +1,19 @@
+BasedOnStyle: LLVM
+
+UseTab: Never
+IndentWidth: 4
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: false
+ColumnLimit: 0
+TabWidth: 4
+
+NamespaceIndentation: All
+SpacesBeforeTrailingComments: 2
+AlignTrailingComments: true
+SpaceBeforeInheritanceColon: true
+AlignConsecutiveAssignments: true
+
+SortIncludes: false
+# only available on clang 10
+#AlignConsecutiveMacros: true
