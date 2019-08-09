@@ -9,23 +9,55 @@ set(GRASSHOPPER_BUILD_NAME "${PROJECT_NAME}")
 
 file(GLOB_RECURSE grasshopper_src "src/*.cpp")
 
+
+######################################################
+#			Targets
+#######################################################
+
 add_library(${GRASSHOPPER_BUILD_NAME}_static STATIC ${grasshopper_src})
 
 add_library(${GRASSHOPPER_BUILD_NAME} SHARED ${grasshopper_src})
 
+#####################################################################
+#			Dependencies
+##########################################################################
+set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
+
+#### 	spdlog   ##################
+if(NOT TARGET spdlog)
+	add_subdirectory(vendor/spdlog)
+endif()
+
+#spdlog_enable_warnings(${GRASSHOPPER_BUILD_NAME})
+#spdlog_enable_warnings(${GRASSHOPPER_BUILD_NAME}_static)
+
+#link_libraries(spdlog::spdlog)
+#include_directories(${VENDOR_DIR}/spdlog/include)
+#include_directories(${VENDOR_DIR}/spdlog/include/spdlog)
+
+##########################################################################
+#  			Target Includes
+#########################################################################
 target_include_directories(${GRASSHOPPER_BUILD_NAME}_static
 	PUBLIC
 		$<INSTALL_INTERFACE:include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Grasshopper
+		${VENDOR_DIR}/spdlog/include
+		${VENDOR_DIR}/spdlog/include/spdlog
 )
 
 target_include_directories(${GRASSHOPPER_BUILD_NAME}
 	PUBLIC
 		$<INSTALL_INTERFACE:include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		${VENDOR_DIR}/spdlog/include
+		${VENDOR_DIR}/spdlog/include/spdlog
+	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Grasshopper
+		${VENDOR_DIR}/spdlog/include
+		${VENDOR_DIR}/spdlog/include/spdlog
 )
 
 # PLATFORM SPECIFIC DEFINES
