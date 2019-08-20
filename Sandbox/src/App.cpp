@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Grasshopper.hpp>
+#include "Grasshopper/Grasshopper.hpp"
 
 class Sandbox : public gh::Application
 {
@@ -10,5 +10,6 @@ class Sandbox : public gh::Application
 
 gh::Application *gh::create_application()
 {
+    gh::Log::get_client_logger()->info("Hello from client!");
     return new Sandbox();
 };
