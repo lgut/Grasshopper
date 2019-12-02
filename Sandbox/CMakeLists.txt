@@ -6,7 +6,15 @@ file(GLOB_RECURSE sandbox_src "src/*.cpp" "src/*.hpp")
 add_executable(${PROJECT_NAME} ${sandbox_src})
 add_executable(${PROJECT_NAME}_static ${sandbox_src})
 
-include_directories(${GRASSHOPPER_HEADERS_DIR})
+#include_directories(${GRASSHOPPER_HEADERS_DIR})
 
-target_link_libraries(${PROJECT_NAME} Grasshopper)
-target_link_libraries(${PROJECT_NAME}_static Grasshopper_static)
+
+
+#target_link_libraries(${PROJECT_NAME} Grasshopper)
+#target_link_libraries(${PROJECT_NAME}_static Grasshopper_static)
+if(NOT TARGET Grasshopper)
+	find_package(Grasshopper REQUIRED)
+endif()
+
+target_link_libraries(${PROJECT_NAME} Grasshopper::Grasshopper)
+target_link_libraries(${PROJECT_NAME}_static Grasshopper::Grasshopper_static)

@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(Grasshopper VERSION 0.0.1 DESCRIPTION "A Grasshopper's game engine")
+# conan cmake_find_package integration
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+
+include(GNUInstallDirs)
 
 include(cmake/ide.cmake)
 
@@ -7,6 +11,7 @@ include(cmake/ide.cmake)
 set(GRASSHOPPER_SHARED "${PROJECT_NAME}")
 set(GRASSHOPPER_STATIC "${PROJECT_NAME}_static")
 
+#TODO: dont use glob
 file(GLOB_RECURSE grasshopper_src "src/*.cpp" "src/*.hpp")
 
 
@@ -15,24 +20,23 @@ file(GLOB_RECURSE grasshopper_src "src/*.cpp" "src/*.hpp")
 #######################################################
 
 add_library(${GRASSHOPPER_STATIC} STATIC ${grasshopper_src})
+add_library("${PROJECT_NAME}::${GRASSHOPPER_STATIC}" ALIAS ${GRASSHOPPER_STATIC})
 
 add_library(${GRASSHOPPER_SHARED} SHARED ${grasshopper_src})
+add_library("${PROJECT_NAME}::${GRASSHOPPER_SHARED}" ALIAS ${GRASSHOPPER_SHARED})
 
 #####################################################################
 #			Dependencies
 ##########################################################################
 set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
-#### 	spdlog   ##################
-#TODO: replace with find() command
-if(NOT TARGET spdlog)
-    add_subdirectory(${VENDOR_DIR}/spdlog)
-endif()
+find_package(spdlog REQUIRED)
 
 #spdlog_enable_warnings(${GRASSHOPPER_BUILD_NAME})
 #spdlog_enable_warnings(${GRASSHOPPER_BUILD_NAME}_static)
 
-link_libraries(spdlog::spdlog)
+target_link_libraries(${GRASSHOPPER_SHARED} PUBLIC spdlog::spdlog)
+target_link_libraries(${GRASSHOPPER_STATIC} PUBLIC spdlog::spdlog)
 
 ##########################################################################
 #  			Target Includes
@@ -40,8 +44,7 @@ link_libraries(spdlog::spdlog)
 target_include_directories(${GRASSHOPPER_STATIC}
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include/Grasshopper>
-		${VENDOR_DIR}/spdlog/include
+    	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Grasshopper
 )
@@ -49,8 +52,7 @@ target_include_directories(${GRASSHOPPER_STATIC}
 target_include_directories(${GRASSHOPPER_SHARED}
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include/Grasshopper>
-		${VENDOR_DIR}/spdlog/include
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Grasshopper
 )
@@ -66,4 +68,51 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 #TODO: set up install/export
-# export(TARGETS ${GRASSHOPPER_SHARED} ${GRASSHOPPER_STATIC} NAMESPACE Grasshopper:: FILE GrasshopperTargets.cmake)
+set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+
+install(
+	TARGETS
+		${GRASSHOPPER_SHARED}
+		${GRASSHOPPER_STATIC}
+	EXPORT
+		"${PROJECT_NAME}Targets"
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+	EXPORT "${PROJECT_NAME}Targets"
+	FILE GrasshopperTargets.cmake
+	NAMESPACE "${PROJECT_NAME}::"
+	DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+install(
+	DIRECTORY include/Grasshopper
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+#####################
+# ConfigVersion file
+##
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/GrasshopperConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/GrasshopperConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/GrasshopperConfig.cmake
+    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+## Install all the helper files
+install(
+    FILES
+      ${CMAKE_CURRENT_BINARY_DIR}/GrasshopperConfig.cmake
+      ${CMAKE_CURRENT_BINARY_DIR}/GrasshopperConfigVersion.cmake
+    DESTINATION ${INSTALL_CONFIGDIR}
+)
