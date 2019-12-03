@@ -26,6 +26,11 @@ add_library(${GRASSHOPPER_SHARED} SHARED ${grasshopper_src})
 add_library("${PROJECT_NAME}::${GRASSHOPPER_SHARED}" ALIAS ${GRASSHOPPER_SHARED})
 
 #####################################################################
+#			properties
+##########################################################################
+set_property(TARGET ${GRASSHOPPER_SHARED} PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+#####################################################################
 #			Dependencies
 ##########################################################################
 set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)

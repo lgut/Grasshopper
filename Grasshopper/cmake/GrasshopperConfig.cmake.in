@@ -1,5 +1,6 @@
 @PACKAGE_INIT@
 
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 include(CMakeFindDependencyMacro)
 
 find_dependency(spdlog REQUIRED)
